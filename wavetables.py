@@ -59,6 +59,30 @@ def sawsquare(squarestart, squareend):
     return values
 
 
+def supersaw(teeth, firstlenght, stheight):
+    """Makes a supersaw.
+
+    teeth is the number of teeth,
+    firstlength is the length of the first tooth
+    """
+    stlength = (WAVE_LENGTH - firstlenght) / (teeth - 1)
+    slope = (MAXVAL - MINVAL + (teeth - 1) * stheight) / WAVE_LENGTH
+
+    values = [round(MAXVAL - x * slope) for x in range(firstlenght)]
+
+    for r in range(1, teeth):
+        pos = len(values)
+        values.extend(
+            [
+                round(MAXVAL - x * slope + stheight * r)
+                for x in range(pos, int(pos + stlength))
+            ]
+        )
+
+    values.extend([MINVAL] * (WAVE_LENGTH - len(values)))
+    return values
+
+
 #####################
 #
 # Some unused code examples:
@@ -107,6 +131,9 @@ def makewaves():
     # Add a pure saw:
     waves.append(sawsquare(0, 0))
 
+    # And a supersaw:
+    waves.append(supersaw(2, WAVE_LENGTH // 2, 40000))
+
     # Add a halfway square/halfway saw:
     waves.append(sawsquare(WAVE_LENGTH // 4, WAVE_LENGTH // 4))
 
@@ -124,6 +151,7 @@ def wavencode(waves):
     data = b""
     for wav in waves:
         for val in wav:
+            val = max(min(val, MAXVAL), MINVAL)
             data += struct.pack("<h", val)
     return data
 
